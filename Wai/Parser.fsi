@@ -5,6 +5,7 @@ type token =
   | LCURLPAREN
   | RPAREN
   | LPAREN
+  | ASS
   | NEQ
   | GT
   | GEQ
@@ -34,6 +35,7 @@ type tokenId =
     | TOKEN_LCURLPAREN
     | TOKEN_RPAREN
     | TOKEN_LPAREN
+    | TOKEN_ASS
     | TOKEN_NEQ
     | TOKEN_GT
     | TOKEN_GEQ
@@ -81,4 +83,4 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val prog : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (Ast.Stm) 
+val prog : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (Wai.Ast.Stm) 

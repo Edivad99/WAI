@@ -8,7 +8,7 @@ let newline (lexbuf: LexBuffer<_>) = lexbuf.EndPos <- lexbuf.EndPos.NextLine
 
 }
 
-let whitespace = [' ' '\t']+
+let whitespace = [' ' '\t']
 let newline = ('\n' | '\r' '\n')
 let digit = ['0'-'9']
 let int = ['-']?digit+
@@ -20,12 +20,12 @@ let Lid = ['a'-'z' '_'] idbody
 let id = Uid | Lid
 
 rule linecomment = parse
-| newline           { newline lexbuf; tokenize lexbuf }
+| newline           { newline lexbuf; tokenstream lexbuf }
 | _                 { linecomment lexbuf }
 
-and tokenize = parse
-| whitespace        { tokenize lexbuf }
-| newline           { newline lexbuf; tokenize lexbuf }
+and tokenstream = parse
+| whitespace        { tokenstream lexbuf }
+| newline           { newline lexbuf; tokenstream lexbuf }
 | "//"              { linecomment lexbuf }
 | ';'               { SEMICOLON }
 | "skip"            { SKIP }
@@ -33,6 +33,7 @@ and tokenize = parse
 | "else"            { ELSE }
 | "while"           { WHILE }
 | "var"             { VAR }
+| '='               { ASS }
 
 // Arithmetic operators
 | '+'               { PLUS }
@@ -48,7 +49,7 @@ and tokenize = parse
 | "||"              { OR }
 | '<'               { LT }
 | "<="              { LEQ }
-| '='               { EQ }
+| "=="              { EQ }
 | ">="              { GEQ }
 | '>'               { GT }
 | "!="              { NEQ }
