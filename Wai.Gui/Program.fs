@@ -1,11 +1,8 @@
 ﻿open System.Diagnostics
-open FSharp.Text.Lexing
+open Wai
 open Wai.AbstractState
 open Wai.Domains.IntervalDomain
 open Wai.Gui
-
-let evaluate input =
-  LexBuffer<char>.FromString input |> Parser.prog Lexer.tokenstream
 
 [<EntryPoint>]
 let main args =
@@ -17,10 +14,16 @@ while (x < 40) {
   x = x + 1;
   y = y + x;
 }
+
+var x = 0;
+
+if (x < 10) {
+  x = x / 0;
+}
     """
 
   let domain = IntervalDomain()
-  let program = evaluate input
+  let program = Evaluate.evaluate input
 
   let abstract_state = AbstractState(domain)
 
@@ -30,5 +33,7 @@ while (x < 40) {
 
   let path = Report.generate_report input program_points delta
 
-  Process.Start(ProcessStartInfo(UseShellExecute = true, FileName = path)) |> ignore
+  Process.Start(ProcessStartInfo(UseShellExecute = true, FileName = path))
+  |> ignore
+
   0

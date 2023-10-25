@@ -15,6 +15,7 @@ let private source =
     </head>
     <body style="margin-left: 20px;background-color: white;">
       <h3 class="display-3">While Abstract Interpreter</h3>
+      <strong class="text-body-secondary">Davide Albiero, Damiano Mason</strong>
       <br>
       <small>Analyzed in: {{delta}} ms</small><br>
       <small>Generated at: {{time}}</small>

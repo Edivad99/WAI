@@ -6,8 +6,9 @@ open Wai.Ast.Utils
 [<AbstractClass>]
 type Domain<'T when 'T: equality>() =
 
-  abstract top: 'T
-  abstract eval_var: var_name: string -> expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
+  abstract eval_var_dec: var_name: string -> expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
+  abstract eval_var_ass: var_name: string -> expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
+
   abstract eval_abstr_cond: expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
 
   abstract union: x: 'T -> y: 'T -> 'T
@@ -75,18 +76,3 @@ type Domain<'T when 'T: equality>() =
       | UnOp("!", expr) -> this.eval_abstr_cond expr state
       | _ -> state
     | _ -> state
-
-  member this.get_init_state program =
-    let rec find_variable program =
-      match program with
-      | VarDec(name, _) -> Set.singleton name
-      | VarAss _ -> Set.empty
-      | Skip -> Set.empty
-      | IfThenElse(_, true_branch, None) -> find_variable true_branch
-      | IfThenElse(_, true_branch, Some false_branch) -> Set.union (find_variable true_branch) (find_variable false_branch)
-      | While(_, block) -> find_variable block
-      | Seq (stm_1, stm_2) -> Set.union (find_variable stm_1) (find_variable stm_2)
-
-    find_variable program
-    |> Seq.map (fun x -> (x, this.top))
-    |> Map.ofSeq

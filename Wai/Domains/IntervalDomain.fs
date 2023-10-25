@@ -156,8 +156,6 @@ type Interval =
 type IntervalDomain() =
   inherit Domain<Interval>()
 
-  override this.top = Range(MinusInf, PlusInf)
-
   override this.union x y = Interval.union x y
 
   override this.widening x y =
@@ -205,12 +203,19 @@ type IntervalDomain() =
       | _ -> failwithf "Not implemented yet"
     | _ -> failwithf "Not implemented yet"
 
-  override this.eval_var var_name expr state =
-    let value = this.eval_expr expr state
+  override this.eval_var_dec var_name expr state =
+    match state.ContainsKey var_name with
+    | true -> state.Add(var_name, Bottom)
+    | false ->
+      let value = this.eval_expr expr state
+      state.Add(var_name, value)
 
-    match value with
-    | Range _ -> state.Add(var_name, value)
-    | Bottom -> Map.empty
+  override this.eval_var_ass var_name expr state =
+    match state.ContainsKey var_name with
+    | false -> state.Add(var_name, Bottom)
+    | true ->
+      let value = this.eval_expr expr state
+      state.Add(var_name, value)
 
   override this.eval_abstr_cond expr state =
     match expr with
