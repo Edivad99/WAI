@@ -201,6 +201,7 @@ type IntervalDomain() =
       | "*" -> left_val * right_val
       | "/" -> left_val / right_val
       | _ -> failwithf "Not implemented yet"
+    | Expr.Range (a, b) -> Range (Num a, Num b)
     | _ -> failwithf "Not implemented yet"
 
   override this.eval_var_dec var_name expr state =

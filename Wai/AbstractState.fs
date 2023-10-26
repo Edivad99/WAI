@@ -10,7 +10,6 @@ type AbstractState<'T when 'T: equality>(domain: Domain<'T>) =
     match program with
     | Skip -> (state, state_points @ [ state ])
 
-    // Se l'expr è valutata come bottom, lo propaghiamo
     | VarDec(var_name, expr) ->
       let state = this.Domain.eval_var_dec var_name expr state
       (state, state_points @ [ state ])
@@ -19,8 +18,6 @@ type AbstractState<'T when 'T: equality>(domain: Domain<'T>) =
       let state = this.Domain.eval_var_ass var_name expr state
       (state, state_points @ [ state ])
 
-    // Esegui il primo sotto-programma e poi il secondo sullo stato risultato
-    // dall'esecuzione del primo
     | Seq(p1, p2) ->
       let (s1, state_points) = this.eval (p1, state, state_points)
       this.eval (p2, s1, state_points)
@@ -44,7 +41,6 @@ type AbstractState<'T when 'T: equality>(domain: Domain<'T>) =
           else
             this.eval (false_branch, state_else_cond, List.empty)
 
-        // Fai il point wise union
         let next = this.Domain.point_wise_union s1 s2
 
         (next,
@@ -52,7 +48,6 @@ type AbstractState<'T when 'T: equality>(domain: Domain<'T>) =
          @ [ state_cond ]
            @ true_branch_points @ [ state_else_cond ] @ false_branch_points @ [ next ])
       | None ->
-        // Fai il point wise union
         let next = this.Domain.point_wise_union s1 state
 
         (next, state_points @ [ state_cond ] @ true_branch_points @ [ next ])

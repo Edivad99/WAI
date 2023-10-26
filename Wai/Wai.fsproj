@@ -5,15 +5,11 @@
     <TargetFramework>net7.0</TargetFramework>
     <FsLexToolExe>fslex.dll</FsLexToolExe>
     <FsYaccToolExe>fsyacc.dll</FsYaccToolExe>
+    <FsYaccOutputFolder>Grammar\</FsYaccOutputFolder>
+    <FsLexOutputFolder>Grammar\</FsLexOutputFolder>
   </PropertyGroup>
 
   <ItemGroup>
-    <FsYacc Include="Grammar\Parser.fsy">
-      <OtherFlags>--module Parser</OtherFlags>
-    </FsYacc>
-    <FsLex Include="Grammar\Lexer.fsl">
-      <OtherFlags>--module Lexer --unicode</OtherFlags>
-    </FsLex>
     <None Include="input.wl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -21,6 +17,12 @@
     <Compile Include="Grammar\Parser.fsi" />
     <Compile Include="Grammar\Parser.fs" />
     <Compile Include="Grammar\Lexer.fs" />
+    <FsYacc Include="Grammar\Parser.fsy">
+      <OtherFlags>--module Parser</OtherFlags>
+    </FsYacc>
+    <FsLex Include="Grammar\Lexer.fsl">
+      <OtherFlags>--module Lexer --unicode</OtherFlags>
+    </FsLex>
     <Compile Include="Evaluate.fs" />
     <Compile Include="Domains\Domain.fs" />
     <Compile Include="Domains\IntervalDomain.fs" />
@@ -28,11 +30,6 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <FsYaccOutputFolder>Grammar\</FsYaccOutputFolder>
-    <FsLexOutputFolder>Grammar\</FsLexOutputFolder>
-  </PropertyGroup>
-  
   <ItemGroup>
     <PackageReference Include="FsLexYacc" Version="11.2.0" />
   </ItemGroup>

@@ -56,6 +56,8 @@ and tokenstream = parse
 
 | '('               { LPAREN }
 | ')'               { RPAREN }
+| '['               { LSQRPAREN }
+| ']'               { RSQRPAREN }
 | '{'               { LCURLPAREN }
 | '}'               { RCURLPAREN }
 
@@ -67,4 +69,4 @@ and tokenstream = parse
 | id                { Identifier (lexeme lexbuf) }
 
 | eof               { EOF }
-| _                 { lexeme lexbuf |> sprintf "Parsing error: %s" |> failwith }
+| _                 { raise (Exception $"SyntaxError: Unexpected char: '{String(lexeme lexbuf)}' Line: {lexbuf.StartPos.Line + 1} Column: {lexbuf.StartPos.Column + 1}") }

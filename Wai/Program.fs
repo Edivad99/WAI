@@ -2,17 +2,18 @@
 
 open System.IO
 open System.Reflection
-
 open Wai
 open Wai.AbstractState
 open Wai.Domains.IntervalDomain
 
-let ROOT = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
-Directory.SetCurrentDirectory ROOT
 
 [<EntryPoint>]
 let main args =
-  let input = File.ReadAllText "./input.wl"
+  let input =
+    Assembly.GetExecutingAssembly().Location
+    |> Path.GetDirectoryName
+    |> fun x -> Path.Combine (x, "input.wl")
+    |> File.ReadAllText
 
   let program = Evaluate.evaluate input
   printfn $"{program}"
