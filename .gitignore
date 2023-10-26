@@ -400,3 +400,8 @@ FodyWeavers.xsd
 
 # macOS
 .DS_Store
+
+# FsYacc Lexer and Parsers Files
+Wai/Grammar/*
+!Wai/Grammar/Lexer.fsl
+!Wai/Grammar/Parser.fsy
