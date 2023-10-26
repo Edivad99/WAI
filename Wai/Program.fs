@@ -1,29 +1,18 @@
 ﻿module Ast.Program
 
+open System.IO
+open System.Reflection
+
 open Wai
 open Wai.AbstractState
 open Wai.Domains.IntervalDomain
 
+let ROOT = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
+Directory.SetCurrentDirectory ROOT
+
 [<EntryPoint>]
 let main args =
-  let input =
-    """
-skip;
-var x = 2;
-if (x == 2) {
-  skip;
-  x = x + 1;
-}
-while (x < 2) {
-  skip;
-}
-if (x < 2) {
-  skip;
-  x = x + 1;
-} else {
-  var y = 10
-}
-"""
+  let input = File.ReadAllText "./input.wl"
 
   let program = Evaluate.evaluate input
   printfn $"{program}"
