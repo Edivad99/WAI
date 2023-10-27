@@ -9,7 +9,10 @@ type Domain<'T when 'T: equality>() =
   abstract eval_var_dec: var_name: string -> expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
   abstract eval_var_ass: var_name: string -> expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
 
-  abstract eval_abstr_cond: expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
+  abstract eval_leq: l: Expr -> r: Expr -> state: Map<string, 'T> -> Map<string, 'T>
+  abstract eval_grt: l: Expr -> r: Expr -> state: Map<string, 'T> -> Map<string, 'T>
+  abstract eval_equ: l: Expr -> r: Expr -> state: Map<string, 'T> -> Map<string, 'T>
+  abstract eval_neq: l: Expr -> r: Expr -> state: Map<string, 'T> -> Map<string, 'T>
 
   abstract union: x: 'T -> y: 'T -> 'T
   abstract intersect: x: 'T -> y: 'T -> 'T
@@ -40,13 +43,17 @@ type Domain<'T when 'T: equality>() =
       }
     )
 
-  member this.eval_generic_abstr_cond expr state =
+  member this.eval_abstr_cond expr state =
     match expr with
     | Boolean true -> state
     | Boolean false -> Map.empty
 
-    | BinOp(l, "<", r) -> this.eval_abstr_cond (BinOp(r, ">", l)) state
-    | BinOp(l, ">=", r) -> this.eval_abstr_cond (BinOp(r, "<=", l)) state
+    | BinOp(l, "<=", r) -> this.eval_leq l r state
+    | BinOp(l, ">=", r) -> this.eval_leq r l state
+    | BinOp(l, ">", r) -> this.eval_grt l r state
+    | BinOp(l, "<", r) -> this.eval_grt r l state
+    | BinOp(l, "==", r) -> this.eval_equ l r state
+    | BinOp(l, "!=", r) -> this.eval_neq l r state
 
     | BinOp(l, "&&", r) ->
       let left_val = this.eval_abstr_cond l state

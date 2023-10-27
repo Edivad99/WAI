@@ -201,7 +201,7 @@ type IntervalDomain() =
       | "*" -> left_val * right_val
       | "/" -> left_val / right_val
       | _ -> failwithf "Not implemented yet"
-    | Expr.Range (a, b) -> Range (Num a, Num b)
+    | Expr.Range(a, b) -> Range(Num a, Num b)
     | _ -> failwithf "Not implemented yet"
 
   override this.eval_var_dec var_name expr state =
@@ -218,151 +218,116 @@ type IntervalDomain() =
       let value = this.eval_expr expr state
       state.Add(var_name, value)
 
-  override this.eval_abstr_cond expr state =
-    match expr with
-    | BinOp(l, "<=", r) ->
-      match l, r with
-      | Constant a, Constant b -> if a <= b then state else Map.empty
+  override this.eval_leq l r state =
+    match l, r with
+    | Constant a, Constant b -> if a <= b then state else Map.empty
+    | Variable var_name, Constant c ->
+      let c = Num c
 
-      | Variable var_name, Constant c ->
-        let c = Num c
-        let left_val = this.eval_expr l state
+      match this.eval_expr l state with
+      | Range(a, _) when c < a -> Map.empty
+      | Range(a, b) -> state.Add(var_name, Range(a, min b c))
+      | _ -> state
+    | Constant c, Variable var_name ->
+      let c = Num c
 
-        match left_val with
-        | Range(a, b) ->
-          if c < a then
-            Map.empty
-          else
-            state.Add(var_name, Range(a, min b c))
-        | _ -> state
-
-      | Constant c, Variable var_name ->
-        let c = Num c
-        let right_val = this.eval_expr r state
-
-        match right_val with
-        | Range(a, b) ->
-          if b < c then
-            Map.empty
-          else
-            state.Add(var_name, Range(max a c, b))
-        | _ -> state
-
-      | Variable left_var_name, Variable right_var_name ->
-        let left_val = this.eval_expr l state
-        let right_val = this.eval_expr r state
-
-        match left_val, right_val with
-        | Range(a, b), Range(c, d) ->
-          if a > d then
-            Map.empty
-          else
-            let state = state.Add(left_var_name, Range(a, min b d))
-            state.Add(right_var_name, Range(max c a, d))
-        | _ -> state
+      match this.eval_expr r state with
+      | Range(_, b) when b < c -> Map.empty
+      | Range(a, b) -> state.Add(var_name, Range(max a c, b))
       | _ -> state
 
-    | BinOp(l, ">", r) ->
+    | Variable left_var_name, Variable right_var_name ->
+      match this.eval_expr l state, this.eval_expr r state with
+      | Range(a, _), Range(_, d) when a > d -> Map.empty
+      | Range(a, b), Range(c, d) ->
+        state
+          .Add(left_var_name, Range(a, min b d))
+          .Add(right_var_name, Range(max c a, d))
+      | _ -> state
+    | _ -> state
+
+  override this.eval_grt l r state =
+    match l, r with
+    | Constant a, Constant b -> if a > b then state else Map.empty
+    | Variable var_name, Constant c ->
+      let c = Num c
+
+      match this.eval_expr l state with
+      | Range(a, b) when c >= b -> Map.empty
+      | Range(a, b) -> state.Add(var_name, Range(max a (c + Num 1), b))
+      | _ -> state
+    | Constant c, Variable var_name ->
+      let c = Num c
+
+      match this.eval_expr r state with
+      | Range(a, b) when c <= a -> Map.empty
+      | Range(a, b) -> state.Add(var_name, Range(a, min (c - Num 1) b))
+      | _ -> state
+    | Variable left_var_name, Variable right_var_name ->
+      match this.eval_expr l state, this.eval_expr r state with
+      | Range(a, b), Range(c, d) when b <= c -> Map.empty
+      | Range(a, b), Range(c, d) ->
+        state
+          .Add(left_var_name, Range(max a (c + Num 1), b))
+          .Add(right_var_name, Range(c, min (b - Num 1) d))
+      | _ -> state
+    | _ -> state
+
+  override this.eval_equ l r state =
+    let left_val = this.eval_expr l state
+    let right_val = this.eval_expr r state
+
+    match left_val, right_val with
+    | Range(a, b), Range(c, d) when b < c || d < a -> Map.empty
+    | Range _, Range _ ->
+      let new_value = this.intersect left_val right_val
+
       match l, r with
-      | Constant a, Constant b -> if a > b then state else Map.empty
-      | Variable var_name, Constant c ->
-        let c = Num c
-        let left_val = this.eval_expr l state
+      | Variable left_var_name, Variable right_var_name -> state.Add(left_var_name, new_value).Add(right_var_name, new_value)
+      | Variable left_var_name, _ -> state.Add(left_var_name, new_value)
+      | _, Variable right_var_name -> state.Add(right_var_name, new_value)
+      | _ -> state
+    | _ -> state
 
-        match left_val with
-        | Range(a, b) ->
-          if c >= b then
-            Map.empty
-          else
-            state.Add(var_name, Range(max a (c + Num 1), b))
-        | _ -> state
-      | Constant c, Variable var_name ->
-        let c = Num c
-        let right_val = this.eval_expr r state
+  override this.eval_neq l r state =
+    match l, r with
+    | Constant a, Constant b -> if a <> b then state else Map.empty
+    | Variable var_name, Constant c
+    | Constant c, Variable var_name ->
+      let c = Num c
+      let left_val = this.eval_expr l state
 
-        match right_val with
-        | Range(a, b) ->
-          if c <= a then
-            Map.empty
-          else
-            state.Add(var_name, Range(a, min (c - Num 1) b))
-        | _ -> state
-      | Variable left_var_name, Variable right_var_name ->
-        let left_val = this.eval_expr l state
-        let right_val = this.eval_expr r state
-
-        match left_val, right_val with
-        | Range(a, b), Range(c, d) ->
-          if b <= c then
-            Map.empty
-          else
-            state
-              .Add(left_var_name, Range(max a (c + Num 1), b))
-              .Add(right_var_name, Range(c, min (b - Num 1) d))
-        | _ -> state
+      match left_val with
+      | Range(a, b) ->
+        if c < a || c > b then
+          state
+        elif a < c && c < b then
+          Map.empty
+        elif a = c && c < b then
+          state.Add(var_name, Range(a + Num 1, b))
+        elif b = c && a < b then
+          state.Add(var_name, Range(a, b - Num 1))
+        else
+          state
       | _ -> state
 
-    | BinOp(l, "==", r) ->
+    | Variable left_var_name, Variable right_var_name ->
       let left_val = this.eval_expr l state
       let right_val = this.eval_expr r state
 
       match left_val, right_val with
       | Range(a, b), Range(c, d) ->
-        if b < c then
+        if c < a && b < d then
           Map.empty
-        elif d < a then
+        elif a < c && d < b then
           Map.empty
+        elif a > d || b < c then
+          state
+        elif a > c then
+          this.eval_abstr_cond (BinOp(r, "!=", l)) state
         else
-          let new_value = this.intersect left_val right_val
-
-          match l, r with
-          | Variable left_var_name, Variable right_var_name -> state.Add(left_var_name, new_value).Add(right_var_name, new_value)
-          | Variable left_var_name, _ -> state.Add(left_var_name, new_value)
-          | _, Variable right_var_name -> state.Add(right_var_name, new_value)
-          | _ -> state
+          let state = state.Add(left_var_name, Range(a, min (c - Num 1) b))
+          let lower_bound = min (max c (b + Num 1)) d
+          state.Add(right_var_name, Range(lower_bound, d))
       | _ -> state
-
-    | BinOp(l, "!=", r) ->
-      match l, r with
-      | Constant a, Constant b -> if a <> b then state else Map.empty
-      | Variable var_name, Constant c
-      | Constant c, Variable var_name ->
-        let c = Num c
-        let left_val = this.eval_expr l state
-
-        match left_val with
-        | Range(a, b) ->
-          if c < a || c > b then
-            state
-          elif a < c && c < b then
-            Map.empty
-          elif a = c && c < b then
-            state.Add(var_name, Range(a + Num 1, b))
-          elif b = c && a < b then
-            state.Add(var_name, Range(a, b - Num 1))
-          else
-            state
-        | _ -> state
-
-      | Variable left_var_name, Variable right_var_name ->
-        let left_val = this.eval_expr l state
-        let right_val = this.eval_expr r state
-
-        match left_val, right_val with
-        | Range(a, b), Range(c, d) ->
-          if c < a && b < d then
-            Map.empty
-          elif a < c && d < b then
-            Map.empty
-          elif a > d || b < c then
-            state
-          elif a > c then
-            this.eval_abstr_cond (BinOp(r, "!=", l)) state
-          else
-            let state = state.Add(left_var_name, Range(a, min (c - Num 1) b))
-            let lower_bound = min (max c (b + Num 1)) d
-            state.Add(right_var_name, Range(lower_bound, d))
-        | _ -> state
-      | _ -> state
-
-    | _ -> this.eval_generic_abstr_cond expr state
+    | _ -> state
