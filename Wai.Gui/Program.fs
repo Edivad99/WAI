@@ -1,7 +1,7 @@
 ﻿open System.Diagnostics
 open Wai
 open Wai.AbstractState
-open Wai.Domains.IntervalDomain
+open Wai.Domains.Interval.IntervalDomain
 open Wai.Gui
 
 [<EntryPoint>]

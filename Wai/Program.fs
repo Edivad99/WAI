@@ -1,10 +1,10 @@
-﻿module Ast.Program
+﻿module Wai.Program
 
 open System.IO
 open System.Reflection
 open Wai
 open Wai.AbstractState
-open Wai.Domains.IntervalDomain
+open Wai.Domains.Interval.IntervalDomain
 
 
 [<EntryPoint>]
@@ -20,7 +20,6 @@ let main args =
 
   let domain = IntervalDomain()
   let abstract_state = AbstractState(domain)
-
   let result, program_points = abstract_state.eval program
-  printfn $"{result}"
+  printfn $"Result: {result}"
   0

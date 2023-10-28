@@ -6,9 +6,10 @@ open Wai.Ast.Utils
 [<AbstractClass>]
 type Domain<'T when 'T: equality>() =
 
-  abstract eval_var_dec: var_name: string -> expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
-  abstract eval_var_ass: var_name: string -> expr: Expr -> state: Map<string, 'T> -> Map<string, 'T>
+  abstract bottom: 'T
+  abstract top: 'T
 
+  abstract eval_expr: expr: Expr -> state: Map<string, 'T> -> 'T
   abstract eval_leq: l: Expr -> r: Expr -> state: Map<string, 'T> -> Map<string, 'T>
   abstract eval_grt: l: Expr -> r: Expr -> state: Map<string, 'T> -> Map<string, 'T>
   abstract eval_equ: l: Expr -> r: Expr -> state: Map<string, 'T> -> Map<string, 'T>
@@ -42,6 +43,20 @@ type Domain<'T when 'T: equality>() =
           | None -> ()
       }
     )
+
+  member this.eval_var_dec var_name expr state =
+    match Map.containsKey var_name state with
+    | true -> state.Add(var_name, this.bottom)
+    | false ->
+      let value = this.eval_expr expr state
+      state.Add(var_name, value)
+
+  member this.eval_var_ass var_name expr state =
+    match Map.containsKey var_name state with
+    | false -> state.Add(var_name, this.bottom)
+    | true ->
+      let value = this.eval_expr expr state
+      state.Add(var_name, value)
 
   member this.eval_abstr_cond expr state =
     match expr with

@@ -10,9 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="input.wl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <Compile Include="Ast.fs" />
     <Compile Include="Grammar\Parser.fsi" />
     <Compile Include="Grammar\Parser.fs" />
@@ -25,13 +22,19 @@
     </FsLex>
     <Compile Include="Evaluate.fs" />
     <Compile Include="Domains\Domain.fs" />
-    <Compile Include="Domains\IntervalDomain.fs" />
+    <Compile Include="Domains\Interval\Types.fs" />
+    <Compile Include="Domains\Interval\IntervalDomain.fs" />
     <Compile Include="AbstractState.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FsLexYacc" Version="11.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Examples\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
