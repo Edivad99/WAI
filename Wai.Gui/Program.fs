@@ -1,8 +1,9 @@
-﻿open System.Diagnostics
+﻿module WaiGui.Program
+
+open System.Diagnostics
 open Wai
 open Wai.AbstractState
 open Wai.Domains.Interval.IntervalDomain
-open Wai.Gui
 
 [<EntryPoint>]
 let main args =

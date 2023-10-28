@@ -1,4 +1,4 @@
-module Wai.Gui.Report
+module WaiGui.Report
 
 open System
 open System.IO

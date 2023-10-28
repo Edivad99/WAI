@@ -5,6 +5,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Wai", "Wai\Wai.fsproj", "{7
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Wai.Gui", "Wai.Gui\Wai.Gui.fsproj", "{B88739D5-808D-4366-935F-F801151CE6DA}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Wai.Test", "Wai.Test\Wai.Test.fsproj", "{2908BDD8-DFD6-46B0-81EA-6F98F4363544}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,5 +21,9 @@ Global
 		{B88739D5-808D-4366-935F-F801151CE6DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B88739D5-808D-4366-935F-F801151CE6DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B88739D5-808D-4366-935F-F801151CE6DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2908BDD8-DFD6-46B0-81EA-6F98F4363544}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2908BDD8-DFD6-46B0-81EA-6F98F4363544}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2908BDD8-DFD6-46B0-81EA-6F98F4363544}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2908BDD8-DFD6-46B0-81EA-6F98F4363544}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
