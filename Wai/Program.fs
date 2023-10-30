@@ -1,21 +1,13 @@
 ﻿module Wai.Program
 
-open System.IO
-open System.Reflection
-open Wai
 open Wai.AbstractState
 open Wai.Domains.Interval.IntervalDomain
 
 
 [<EntryPoint>]
 let main args =
-  let input =
-    Assembly.GetExecutingAssembly().Location
-    |> Path.GetDirectoryName
-    |> fun x -> Path.Combine (x, "input.wl")
-    |> File.ReadAllText
 
-  let program = Evaluate.evaluate input
+  let program = Evaluate.file_read "input.wl" |> Evaluate.evaluate
   printfn $"{program}"
 
   let domain = IntervalDomain()

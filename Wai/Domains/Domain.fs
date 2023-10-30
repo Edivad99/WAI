@@ -20,18 +20,18 @@ type Domain<'T when 'T: equality>() =
   abstract widening: x: 'T -> y: 'T -> 'T
   abstract narrowing: x: 'T -> y: 'T -> 'T
 
-  member private _.resolve_conflicts f acc key value =
-    match Map.tryFind key acc with
-    | Some v -> Map.add key (f v value) acc
-    | None -> Map.add key value acc
+  member private _.resolve_conflicts f (state: Map<string, 'T>) (key: string) value =
+    match Map.tryFind key state with
+    | Some v -> Map.add key (f v value) state
+    | None -> Map.add key value state
 
-  member this.point_wise_union (s1: Map<string, 'T>) (s2: Map<string, 'T>) =
+  member this.point_wise_union s1 s2 =
     Map.fold (this.resolve_conflicts this.union) s1 s2
 
-  member this.point_wise_widening (s1: Map<string, 'T>) (s2: Map<string, 'T>) =
+  member this.point_wise_widening s1 s2 =
     Map.fold (this.resolve_conflicts this.widening) s1 s2
 
-  member this.point_wise_narrowing (s1: Map<string, 'T>) (s2: Map<string, 'T>) =
+  member this.point_wise_narrowing s1 s2 =
     Map.fold (this.resolve_conflicts this.narrowing) s1 s2
 
   member this.point_wise_intersection (s1: Map<string, 'T>) (s2: Map<string, 'T>) =

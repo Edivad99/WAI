@@ -67,14 +67,14 @@ type IntervalDomain() =
       match this.eval_expr l state with
       | Range(a, _) when c < a -> Map.empty
       | Range(a, b) -> state.Add(var_name, Range(a, min b c))
-      | _ -> state
+      | Bottom -> Map.empty
     | Constant c, Variable var_name ->
       let c = Num c
 
       match this.eval_expr r state with
       | Range(_, b) when b < c -> Map.empty
       | Range(a, b) -> state.Add(var_name, Range(max a c, b))
-      | _ -> state
+      | Bottom -> Map.empty
 
     | Variable left_var_name, Variable right_var_name ->
       match this.eval_expr l state, this.eval_expr r state with
@@ -83,7 +83,7 @@ type IntervalDomain() =
         state
         |> Map.add left_var_name (Range(a, min b d))
         |> Map.add right_var_name (Range(max c a, d))
-      | _ -> state
+      | _ -> Map.empty
     | _ -> state
 
   override this.eval_grt l r state =
@@ -93,24 +93,24 @@ type IntervalDomain() =
       let c = Num c
 
       match this.eval_expr l state with
-      | Range(a, b) when c >= b -> Map.empty
+      | Range(_, b) when c >= b -> Map.empty
       | Range(a, b) -> state.Add(var_name, Range(max a (c + Num 1), b))
-      | _ -> state
+      | Bottom -> Map.empty
     | Constant c, Variable var_name ->
       let c = Num c
 
       match this.eval_expr r state with
-      | Range(a, b) when c <= a -> Map.empty
+      | Range(a, _) when c <= a -> Map.empty
       | Range(a, b) -> state.Add(var_name, Range(a, min (c - Num 1) b))
-      | _ -> state
+      | Bottom -> Map.empty
     | Variable left_var_name, Variable right_var_name ->
       match this.eval_expr l state, this.eval_expr r state with
-      | Range(a, b), Range(c, d) when b <= c -> Map.empty
+      | Range(_, b), Range(c, _) when b <= c -> Map.empty
       | Range(a, b), Range(c, d) ->
         state
         |> Map.add left_var_name (Range(max a (c + Num 1), b))
         |> Map.add right_var_name (Range(c, min (b - Num 1) d))
-      | _ -> state
+      | _ -> Map.empty
     | _ -> state
 
   override this.eval_equ l r state =
@@ -123,17 +123,20 @@ type IntervalDomain() =
       let new_value = this.intersect left_val right_val
 
       match l, r with
-      | Variable left_var_name, Variable right_var_name -> state.Add(left_var_name, new_value).Add(right_var_name, new_value)
-      | Variable left_var_name, _ -> state.Add(left_var_name, new_value)
-      | _, Variable right_var_name -> state.Add(right_var_name, new_value)
+      | Variable left_var_name, Variable right_var_name ->
+        state
+        |> Map.add left_var_name new_value
+        |> Map.add right_var_name new_value
+      | Variable var_name, _
+      | _, Variable var_name -> state.Add(var_name, new_value)
       | _ -> state
-    | _ -> state
+    | Bottom, _
+    | _, Bottom -> Map.empty
 
   override this.eval_neq l r state =
     match l, r with
     | Constant a, Constant b -> if a <> b then state else Map.empty
-    | Variable var_name, Constant c
-    | Constant c, Variable var_name ->
+    | Variable var_name, Constant c -> 
       let c = Num c
       let left_val = this.eval_expr l state
 
@@ -149,8 +152,8 @@ type IntervalDomain() =
           state.Add(var_name, Range(a, b - Num 1))
         else
           state
-      | _ -> state
-
+      | Bottom -> Map.empty
+    | Constant _, Variable _ -> this.eval_neq r l state
     | Variable left_var_name, Variable right_var_name ->
       let left_val = this.eval_expr l state
       let right_val = this.eval_expr r state
@@ -169,5 +172,5 @@ type IntervalDomain() =
           let state = state.Add(left_var_name, Range(a, min (c - Num 1) b))
           let lower_bound = min (max c (b + Num 1)) d
           state.Add(right_var_name, Range(lower_bound, d))
-      | _ -> state
+      | _ -> Map.empty
     | _ -> state

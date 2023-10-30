@@ -7,19 +7,27 @@ open HandlebarsDotNet
 
 let private source =
   """<!DOCTYPE html>
-    <html lang="it">
+    <html lang="en" data-bs-theme="dark">
     <head>
       <meta charset="UTF-8">
       <title>WAI</title>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+      <style>
+        pre {
+          background: #161b22;
+          width: max-content;
+          border-radius: 15px;
+          padding: 15px;
+          margin-top: 15px;
+        }
+      </style>
     </head>
-    <body style="margin-left: 20px;background-color: white;">
+    <body style="margin-left: 20px; background: #0d1117">
       <h3 class="display-3">While Abstract Interpreter</h3>
-      <strong class="text-body-secondary">Davide Albiero, Damiano Mason</strong>
+      <strong>Davide Albiero, Damiano Mason</strong>
       <br>
       <small>Analyzed in: {{delta}} ms</small><br>
       <small>Generated at: {{time}}</small>
-      <h5 style="margin-top: 50px;" class="text-primary">Input code:</h5>
       <pre>{{{code}}}</pre>
     </body>
     </html>"""
@@ -61,7 +69,7 @@ let private format_code (code: string, program_points: Map<string, 'a> list) =
   let formatted_program_points =
     program_points
     |> List.map pretty_points
-    |> List.map (fun x -> $"""<span style="color: green">// {x}</span>""")
+    |> List.map (fun x -> $"""<span style="color: var(--bs-success)">// {x}</span>""")
 
   interleave (formatted_program_points, formatted_code) |> String.concat ("\n")
 

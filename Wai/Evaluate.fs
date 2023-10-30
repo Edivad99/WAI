@@ -1,6 +1,8 @@
 module Wai.Evaluate
 
 open System
+open System.IO
+open System.Reflection
 open FSharp.Text.Lexing
 
 let evaluate input =
@@ -13,3 +15,9 @@ let evaluate input =
     printfn $"Last token: {String(lexbuf.Lexeme)}"
     printfn $"Message: {e.Message}"
     exit 1
+
+let file_read input =
+  Assembly.GetExecutingAssembly().Location
+  |> Path.GetDirectoryName
+  |> fun x -> Path.Combine (x, "Examples", input)
+  |> File.ReadAllText
